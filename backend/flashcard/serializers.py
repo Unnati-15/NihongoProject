@@ -1,16 +1,18 @@
 from rest_framework import serializers
 
 from users.models import User
-from .models import Flashcard, Deck
+from .models import  Deck, Flashcard
 
 class FlashcardSerializer(serializers.ModelSerializer):
+    deck = serializers.PrimaryKeyRelatedField(queryset=Deck.objects.all(), required=True)
+    learner = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
     class Meta:
         model = Flashcard
-        fields = ['front','back','is_learned','deck','learner']
+        fields = ['id','front','back','deck','learner']
 
 class DeckSerializer(serializers.ModelSerializer):
-    learner = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)  # Ensure learner is required
+    learner = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
     class Meta:
         model = Deck
-        fields = [ 'name','description','learner']
+        fields = [ 'id','name','description','learner']
     

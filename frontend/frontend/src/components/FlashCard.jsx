@@ -93,10 +93,13 @@ import { FlashcardList } from './flashcard/FlashcardList';
 export const FlashCard = () => {
   const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState(null);
-
-  const handleCreateDeck = (deckName) => {
-    const newDeck = { id: Date.now(), name: deckName, flashcards: [] };
-    setDecks([...decks, newDeck]);
+  const [successMessage, setSuccessMessage] = useState('');
+  
+  const handleCreateDeck = (decks) => {
+    const newDeck = { ...decks, flashcards: [] };
+    setDecks((prevDecks) => [...prevDecks, newDeck]);
+    console.log(newDeck);
+    setSuccessMessage(`Deck "${decks.name}" created successfully!`);
   };
 
   const handleEditDeck = (deckId, newName) => {
@@ -104,12 +107,15 @@ export const FlashCard = () => {
       deck.id === deckId ? { ...deck, name: newName } : deck
     );
     setDecks(updatedDecks);
+    console.log(updatedDecks);
+    setSuccessMessage(`Deck updated successfully!`);
   };
 
   const handleDeleteDeck = (deckId) => {
     const updatedDecks = decks.filter((deck) => deck.id !== deckId);
     setDecks(updatedDecks);
     setSelectedDeck(null); // Deselect deck if it was deleted
+    
   };
 
   const handleCreateFlashcard = (question, answer) => {
@@ -152,20 +158,40 @@ export const FlashCard = () => {
 
       {/* Create Deck Form */}
       <div className="mb-8">
-        <CreateDeckForm onCreateDeck={handleCreateDeck} />
-      </div>
+        <CreateDeckForm onCreateDeck={handleCreateDeck}  />
+         {/* Render success message */}
+      {successMessage && <div className="mt-4 text-green-500">{successMessage}</div>}
+      
+     {/* Deck List and selected deck-related operations */}
+    <div className="mb-6">
+      <DeckList
+        decks={decks}
+        onCreateDeck={handleCreateDeck}
+        onSelectDeck={setSelectedDeck}
+        onEditDeck={handleEditDeck}
+        onDeleteDeck={handleDeleteDeck}
+      />
+    </div>
 
-      {/* Display Decks */}
-      <div className="mb-6">
-        <DeckList
-          decks={decks}
-          onSelectDeck={setSelectedDeck}
-          onEditDeck={handleEditDeck}
-          onDeleteDeck={handleDeleteDeck}
-        />
-      </div>
+    {/* Render Flashcard form and list only if a deck is selected */}
+    {selectedDeck && (
+      <>
+        <div className="mb-8">
+          <CreateFlashcardForm onCreateFlashcard={handleCreateFlashcard} />
+        </div>
 
-      {selectedDeck && (
+        <div>
+          <FlashcardList
+            flashcards={selectedDeck.flashcards}
+            onEditFlashcard={handleEditFlashcard}
+            onDeleteFlashcard={handleDeleteFlashcard}
+          />
+        </div>
+      </>
+    )}
+  </div>
+
+      {/* {selectedDeck && (
         <>
           <div className="mb-8">
             <CreateFlashcardForm onCreateFlashcard={handleCreateFlashcard} />
@@ -179,7 +205,7 @@ export const FlashCard = () => {
             />
           </div>
         </>
-      )}
+      )} */}
     </div>
   );
 };
