@@ -1,12 +1,15 @@
+from uuid import uuid4
 from translate import Translator
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
+from users.models import User
 from .serializers import UserRegistrationSerializer
 from rest_framework import status
 from django.contrib.auth import authenticate
 from django.contrib.auth import login ,logout
 import speech_recognition as sr
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import HTTP_200_OK
 from django.http import JsonResponse
@@ -19,11 +22,18 @@ from django.views.decorators.csrf import csrf_exempt
 from io import BytesIO
 from googletrans import Translator
 from django.http import JsonResponse, FileResponse
-# import pyttsx3
+import pyttsx3
 from django.conf import settings
 from tempfile import NamedTemporaryFile
+import json
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from sudachipy import tokenizer
+from sudachipy import dictionary
+from collections import Counter
+from rest_framework.views import APIView
 
-
+# Registration API
 @api_view(['POST'])
 def register_user(request):
     if request.method == 'POST':
@@ -33,8 +43,8 @@ def register_user(request):
             return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-import json
 
+# Translate text API
 @api_view(['POST'])
 def translate(request):
     if request.method == "POST":
@@ -63,7 +73,7 @@ def perform_translation(text, from_lang, to_lang):
     # Return the translated text
     return translation.text
 
-
+# Login API
 @api_view(['POST'])
 def login_view(request):
     username = request.data.get('username')
@@ -76,17 +86,7 @@ def login_view(request):
     return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# @api_view(['POST'])
-# def logout_view(request):
-#     logout(request)
-#     return Response({"message": "Logged out successfully"})
-
-# @api_view(['POST'])
-# def check_user(request):
-#     if request.user.is_authenticated:
-#         return Response({"user": {"username": request.user.username}})
-#     return Response({"user": None})
-
+# Logout API
 @api_view(['POST'])
 def logout_view(request):
     print(f"Request user: {request.user}")# Ensure the user is authenticated
@@ -96,6 +96,8 @@ def logout_view(request):
         return Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
     return Response({"message": "User not authenticated"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+# Transcription API
 @api_view(['POST'])
 def transcribe_audio(request):
     """ Handle audio file for transcription """
@@ -122,11 +124,8 @@ def transcribe_audio(request):
     except Exception as e:
         return Response({"error": f"An error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-from PyPDF2 import PdfReader
-from django.http import JsonResponse
 
-from googletrans import Translator
-from googletrans import Translator
+# PDF Translation API
 def pdf_japanese_to_english(text):
      if not text.strip():
         return "Error: Empty text provided for translation."
@@ -147,7 +146,6 @@ def pdf_english_to_japanese(text):
      except Exception as e:
         print(f"Error during translation: {str(e)}")
         return f"Error during translation: {str(e)}"
-
 @csrf_exempt
 def jp_translate_pdf_en(request):
     if request.method == 'POST' and request.FILES.get('pdf'):
@@ -181,7 +179,6 @@ def jp_translate_pdf_en(request):
             return JsonResponse({"error": "Error during translation."}, status=500)
     
     return JsonResponse({"error": "Invalid request."}, status=400)
-
 @csrf_exempt
 def en_translate_pdf_jp(request):
     if request.method == 'POST' and request.FILES.get('pdf'):
@@ -215,7 +212,6 @@ def en_translate_pdf_jp(request):
             return JsonResponse({"error": "Error during translation."}, status=500)
     
     return JsonResponse({"error": "Invalid request."}, status=400)
-# Helper function to generate PDF with translated text
 def generate_pdf_from_text(translated_text):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
@@ -239,40 +235,165 @@ def generate_pdf_from_text(translated_text):
     buffer.seek(0)
     return buffer
 
-# Initialize TTS model
-# tts = TTS(model_name="tts_models/japanese/tacotron2-DDC", gpu=False)
 
+# Summarization API
+# Initialize Sudachipy tokenizer
+tokenizer_obj = dictionary.Dictionary().create()
+
+@api_view(['POST'])
+def summarize_text(request):
+    # Get text from the request data
+    text = request.data.get('text', '')
+
+    if not text:
+        return Response({"error": "No text provided"}, status=400)
+
+    # Tokenize the text
+    mode = tokenizer.Tokenizer.SplitMode.C
+    tokens = tokenizer_obj.tokenize(text, mode)
+
+    # Extract nouns, verbs, and adjectives (filtering based on part of speech)
+    nouns = [token.surface() for token in tokens if token.part_of_speech()[0] == '名詞']
+    verbs = [token.surface() for token in tokens if token.part_of_speech()[0] == '動詞']
+    adjectives = [token.surface() for token in tokens if token.part_of_speech()[0] == '形容詞']
+
+    # Count frequency of each noun, verb, and adjective
+    noun_counts = Counter(nouns)
+    verb_counts = Counter(verbs)
+    adj_counts = Counter(adjectives)
+
+    # Split the text into sentences based on '。' (full stop)
+    sentences = [sentence.strip() for sentence in text.split("。") if len(sentence.strip()) > 0]
+
+    # Rank sentences based on the frequency of important words (nouns, verbs, adjectives)
+    sentence_scores = []
+
+    for sentence in sentences:
+        sentence_tokens = tokenizer_obj.tokenize(sentence, mode)
+        
+        # Extract nouns, verbs, and adjectives from the sentence
+        sentence_nouns = [token.surface() for token in sentence_tokens if token.part_of_speech()[0] == '名詞']
+        sentence_verbs = [token.surface() for token in sentence_tokens if token.part_of_speech()[0] == '動詞']
+        sentence_adjectives = [token.surface() for token in sentence_tokens if token.part_of_speech()[0] == '形容詞']
+        
+        # Calculate sentence score based on frequency of nouns, verbs, and adjectives
+        score = (
+            sum([noun_counts.get(noun, 0) for noun in sentence_nouns]) + 
+            sum([verb_counts.get(verb, 0) for verb in sentence_verbs]) + 
+            sum([adj_counts.get(adj, 0) for adj in sentence_adjectives])
+        )
+        
+        # Append sentence with its score
+        sentence_scores.append((sentence, score))
+
+    # Sort sentences by score in descending order (higher score is more important)
+    sorted_sentences = sorted(sentence_scores, key=lambda x: x[1], reverse=True)
+
+    # Select the top N sentences (you can adjust N)
+    top_n_sentences = 3
+    summary_sentences = [sentence for sentence, score in sorted_sentences[:top_n_sentences]]
+
+    # Join the top sentences to create the summary
+    summary = "。".join(summary_sentences) + "。"
+
+    return Response({"summary": summary})
+
+
+# Text to Speech API
 import os
+class TextToSpeechView(APIView):
+    def post(self, request):
+        # Get text from request data (expecting 'myfile' as the key from the frontend)
+        textSpeech = request.data.get("textSpeech", None)
+        print(textSpeech)
+        if not textSpeech:
+            return Response({"error": "Text parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-# @csrf_exempt
-# def generate_audio(request):
-#     if request.method == 'POST':
-#         try:
-#             # Retrieve the Japanese text input
-#             text = request.POST.get('text', '').strip()
-            
-#             if not text:
-#                 return JsonResponse({'error': 'No text provided'}, status=400)
-            
-#             # Initialize the pyttsx3 engine
-#             engine = pyttsx3.init()
-            
-#             # Set Japanese voice (assuming you have it installed in your system)
-#             jp_voiceid = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_JA-JP_HARUKA_11.0"
-#             engine.setProperty('voice', jp_voiceid)
-            
-#             # Set output file path
-#             output_file_path = os.path.join('media', 'speech.mp3')
-            
-#             # Generate the speech and save to file
-#             engine.save_to_file(text, output_file_path)
-#             engine.runAndWait()
+        try:
+            # Initialize the pyttsx3 engine
+            engine = pyttsx3.init()
 
-#             # Return the URL of the generated audio file
-#             audio_url = f'http://127.0.0.1:8000/media/speech.mp3'
-#             return JsonResponse({'message': 'Audio file is ready!', 'audio_file': audio_url})
+            # Set the Japanese voice (e.g., Microsoft Haruka)
+            jp_voiceid = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_JA-JP_HARUKA_11.0"
+            engine.setProperty('voice', jp_voiceid)
 
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
+            # Set speech rate (slower than the default 200)
+            rate = engine.getProperty('rate')
+            engine.setProperty('rate', rate - 50)  # Adjust rate if necessary
 
-#     return JsonResponse({'error': 'Invalid request'}, status=400)
+            # Create a temporary file to store the generated speech
+            with NamedTemporaryFile(delete=False, suffix='.mp3') as temp_file:
+                temp_filename = temp_file.name
+                # Use pyttsx3 to save speech to the file
+                engine.save_to_file(textSpeech, temp_filename)
+
+                # Run the engine to process the speech
+                engine.runAndWait()
+
+            # Return the path to the generated file (this is what the frontend expects)
+            # Make the file accessible through a URL path (for example: /media/{file_name}.mp3)
+            media_url = f"/media/{os.path.basename(temp_filename)}"
+
+            # Store the file in your media folder (optional, depending on your setup)
+            media_file_path = os.path.join(settings.MEDIA_ROOT, os.path.basename(temp_filename))
+            os.rename(temp_filename, media_file_path)
+
+            return JsonResponse({
+                "file_path": media_url  # Send the media URL to the frontend
+            })
+
+        except Exception as e:
+            return Response({"error": f"Error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+# GET USERNAME API
+@api_view(['GET'])
+def check_username(request, username):
+    try:
+        user = User.objects.get(username=username)
+        print(user)
+        return Response({'isAvailable': False})
+    except User.DoesNotExist:
+        return Response({'isAvailable': True})
+    
+
+# Set up the engine (pyttsx3 initialization)
+engine = pyttsx3.init()
+ # Set the Japanese voice (e.g., Microsoft Haruka)
+jp_voiceid = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_JA-JP_HARUKA_11.0"
+engine.setProperty('voice', jp_voiceid)
+
+            # Set speech rate (slower than the default 200)
+rate = engine.getProperty('rate')
+engine.setProperty('rate', rate - 50)
+
+class TextToSpeechView(APIView):
+    def post(self, request, *args, **kwargs):
+        # Deserialize the incoming data
+        text = request.data.get("text", None)
+        print(text)
+            
+        if not text.strip():
+            return Response({'error': 'Text cannot be empty'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generate a unique filename for the audio
+        audio_filename = f"{uuid4().hex}.mp3"
+        audio_file_path = os.path.join(settings.MEDIA_ROOT, 'audio', audio_filename)
+
+        try:
+                # Ensure the audio directory exists
+                audio_dir = os.path.join(settings.MEDIA_ROOT, 'audio')
+                os.makedirs(audio_dir, exist_ok=True)  # Create the directory if it doesn't exist
+
+                # Save the speech to the file
+                engine.save_to_file(text, audio_file_path)
+                engine.runAndWait()
+
+                # Return the URL to the generated audio file
+                audio_url = f"http://localhost:8000/media/audio/{audio_filename}"
+
+                return Response({'audio_file': audio_url}, status=201)
+
+        except Exception as e:
+                return Response({'error': f'Error generating audio: {str(e)}'}, status=500)
+

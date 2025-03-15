@@ -5,8 +5,12 @@ try:
     engine = pyttsx3.init()
 
     # Set the Japanese voice (e.g., Microsoft Haruka)
-    jp_voiceid = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_JA-JP_ICHIRO_11.0"
+    jp_voiceid = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_JA-JP_HARUKA_11.0"
     engine.setProperty('voice', jp_voiceid)
+
+    # Set speech rate (slower than the default 200)
+    rate = engine.getProperty('rate')
+    engine.setProperty('rate', rate - 50)  # Reduce rate to slow down speech (adjust as needed)
 
     # Sample text to speak
     text = "こんにちは！私はロボットです。"

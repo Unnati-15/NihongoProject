@@ -1,5 +1,6 @@
 import Footer from "./components/Footer";
 import { useEffect, useState } from "react";
+import { Helmet } from 'react-helmet';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import MainPage from "./components/MainPage";
 import MainNavbar from "./components/MainNavbar";
@@ -20,6 +21,11 @@ import KanjiLearning from "./components/KanjiLearning";
 import Quiz from "./components/Quiz";
 import QuizResult from "./components/QuizResult";
 import { FlashCard } from "./components/FlashCard";
+import { More } from "./components/More";
+import Write from "./components/Write";
+import FlashcardApp from "./components/FlashcardApp";
+import QuizDetail from "./components/QuizDetail";
+import { QuizApp } from "./components/QuizApp";
 const App = () => {
   const [token, setToken] = useState('');
   const [skillLevel, setSkillLevel] = useState('');
@@ -35,6 +41,9 @@ const App = () => {
 
   return (
     <Router>
+      <Helmet>
+        <title>Kantanna Nihongo</title>
+      </Helmet>
       <MainApp token={token} skillLevel={skillLevel} setToken={setToken} />
     </Router>
   );
@@ -45,7 +54,7 @@ const App = () => {
 // eslint-disable-next-line react/prop-types
 const MainApp = ({ token, skillLevel, setToken }) => {
   const location = useLocation(); // This will now work because it's inside Router
-  const showMainNavbar = !['/beginner-pages', '/advanced-pages','/phrases','/hiragana','/katakana','/kanji','/quiz','/quiz-result','/write','/flashcard','/more'].includes(location.pathname);
+  const showMainNavbar = !['/beginner-pages', '/advanced-pages','/phrases','/hiragana','/katakana','/kanji','/quiz','/write','/flashcard','/more'].includes(location.pathname);
 
   return (
     <>
@@ -91,23 +100,24 @@ const MainApp = ({ token, skillLevel, setToken }) => {
         {/* Protecting the /phrases route */}
         <Route
           path="/quiz"
-          element={token ? (skillLevel === 'advanced' ? <Quiz /> : <AdvancedPages />) : <Navigate to="/login" />}
+          element={token ? (skillLevel === 'advanced' ? <QuizApp /> : <AdvancedPages />) : <Navigate to="/login" />}
         />
-        <Route
+        {/* <Route path="/quiz/:quizId" exact element={token ? (skillLevel === 'advanced' ? <QuizDetail /> : <AdvancedPages />) : <Navigate to="/login" />} /> */}
+        {/* <Route
           path="/quiz-result"  
           element={token ? (skillLevel === 'advanced' ? <QuizResult /> : <AdvancedPages />) : <Navigate to="/login" />}
-        />
+        /> */}
         <Route
           path="/flashcard"
           element={token ? (skillLevel === 'advanced' ? <FlashCard/> : <AdvancedPages />) : <Navigate to="/login" />}
         />
         <Route
           path="/write"
-          element={token ? (skillLevel === 'advanced' ? <Phrases/> : <AdvancedPages />) : <Navigate to="/login" />}
+          element={token ? (skillLevel === 'advanced' ? <Write/> : <AdvancedPages />) : <Navigate to="/login" />}
         />
         <Route
           path="/more"
-          element={token ? (skillLevel === 'advanced' ? <Phrases/> : <AdvancedPages />) : <Navigate to="/login" />}
+          element={token ? (skillLevel === 'advanced' ? <More/> : <AdvancedPages />) : <Navigate to="/login" />}
         />
 
         <Route path="/" element={<MainPage />} />
@@ -116,6 +126,7 @@ const MainApp = ({ token, skillLevel, setToken }) => {
         <Route path="/translate" element={<TranslateForm />}/>
         <Route path="/translate-pdf" element={<FileUpload />}/>
         <Route path="/resources" element={ <Resources/>}/>
+        <Route path="/flashcard_app" element={token ? (skillLevel === 'advanced' ? <FlashcardApp/> : <AdvancedPages />) : <Navigate to="/login" />}/>
       </Routes>
       <Footer />
     </>

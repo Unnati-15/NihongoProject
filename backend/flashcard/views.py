@@ -89,7 +89,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status,viewsets
 
-from flashcard.models import Deck
+from flashcard.models import Deck, Flashcard
 from .serializers import DeckSerializer, FlashcardSerializer
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -104,7 +104,19 @@ class GetCurrentUserAPIView(APIView):
         print(user.id)
         return Response({"learnerId": user.id})
 
+class GetCurrentDeckAPIView(APIView):
+    permission_classes= [IsAuthenticated]
 
+    def get(self, request):
+        # Try to get the deck for the logged-in user
+        deck = Deck.objects.filter(learner=request.user).first()
+        print(deck.id)
+        if not deck:
+            # If no deck exists for this user, you might want to create a default deck
+            deck = Deck.objects.create(learner=request.user, name="Default Deck")
+
+        return Response({"deckId": deck.id})
+    
 @method_decorator(csrf_exempt, name='dispatch')
 class CreateDeckAPIView(APIView):
     def post(self, request):
@@ -135,3 +147,17 @@ class CreateFlashcardAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class FlashcardViewSet(viewsets.ModelViewSet):
+    queryset = Flashcard.objects.all()
+    serializer_class = FlashcardSerializer
+    permission_classes = [IsAuthenticated]  # Ensure that only authenticated users can access their decks
+
+    def perform_create(self, serializer):
+        # Automatically assign the learner (user) to the deck when it's created
+        serializer.save(deck=self.request.deck)
+        serializer.save(learner=self.request.user)
+    
+    def get_queryset(self):
+        # Filter the queryset to only show decks belonging to the authenticated user
+        return Flashcard.objects.filter(learner=self.request.user)

@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.db import models
 from learner.models import Learner
+from users.models import User
 
 # Level Model (Beginner / Advanced)
 class Level(models.Model):
@@ -60,36 +61,28 @@ class Answer(models.Model):
 
     def __str__(self):
         return self.answer_text
+    
+# Quiz Submission
+class QuizSubmission(models.Model):
+    quiz = models.ForeignKey(Quiz, related_name='submissions', on_delete=models.CASCADE) 
+    submitted_at = models.DateTimeField(auto_now_add=True) 
 
+    def __str__(self):
+        return f'Submission for {self.quiz.title}  at {self.submitted_at}'
 # UserQuizProgress Model (Tracks quiz progress for each user)
-class UserQuizProgress(models.Model):
-    learner = models.ForeignKey(Learner, related_name="quiz_progress", on_delete=models.CASCADE)
+class QuizAttempt(models.Model):
+    learner = models.ForeignKey(User, related_name="quiz_progress", on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, related_name="user_progress", on_delete=models.CASCADE)
-    score = models.IntegerField(default=0)  # User's score on this quiz
-    is_completed = models.BooleanField(default=False)  # Whether the user has completed the quiz
-    start_time = models.DateTimeField(default=timezone.now)  # Time when the quiz was started
-    end_time = models.DateTimeField(null=True, blank=True)  # Time when the quiz was completed
-    total_time_taken = models.DurationField(null=True, blank=True)  # Time taken to complete the quiz
+    score = models.IntegerField(default=0)  
+    attempt_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.learner.username} - {self.quiz.title}"
-
-    # Method to update quiz completion status
-    def mark_completed(self, score, total_time):
-        self.is_completed = True
-        self.score = score
-        self.end_time = timezone.now()
-        self.total_time_taken = total_time
-        self.save()
-
-
+        return f"Attempt {self.id} by {self.learner.username} - {self.quiz.title}"
 # UserAnswer Model (Tracks user's selected answers for each question)
-class UserAnswer(models.Model):
-    learner = models.ForeignKey(Learner, related_name="user_answers", on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, related_name="user_answers", on_delete=models.CASCADE)
-    selected_answer = models.ForeignKey(Answer, related_name="user_answers", on_delete=models.CASCADE)
-    is_correct = models.BooleanField(default=False)  # Whether the user's answer is correct
-    time_taken = models.DurationField()  # Time taken by the user to answer the question
+class AnswerSubmission(models.Model):
+    quiz_attempt = models.ForeignKey(QuizAttempt, related_name='answers', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name='submissions', on_delete=models.CASCADE)
+    answer = models.ForeignKey(Answer, related_name='submissions', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.learner.username} - {self.question.question_text}"
+        return f"Answer {self.id} for Question {self.question.id} by {self.quiz_attempt.learner.username}"

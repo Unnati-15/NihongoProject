@@ -3,9 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export const HomePageAdvanced = () => {
-  const [activeTab, setActiveTab] = useState(1); // 1 for Page 1, 2 for Page 2
-  const [view, setView] = useState('flashcards');
-  const token = localStorage.getItem('token');
+  const [activeTab, setActiveTab] = useState(1); 
     return (
       <>
        
@@ -108,7 +106,7 @@ export const HomePageAdvanced = () => {
                 {/* Flashcard Button */}
                <div className="exams4 text-center">
                  <button className='btn btn-primary'>
-                 <Link to="/flashcard"
+                 <Link to="/flashcard_app"
                    href="https://www.jlpt.jp/"
                    className="linkjlpt text-xl  font-semibold hover:underline"
                  >
@@ -147,12 +145,12 @@ export const HomePageAdvanced = () => {
                 {/* Write Button */}
                <div className="exams4 text-center ">
                  <button className='btn btn-primary'>
-                 <a
+                 <Link to='/write'
                    href="https://www.jlpt.jp/"
                    className="linkjlpt text-xl  font-semibold hover:underline"
                  >
                    Write
-                 </a></button>
+                 </Link></button>
                </div>
         
               </div>
@@ -187,12 +185,12 @@ export const HomePageAdvanced = () => {
                {/* More Button */}
                <div className="exams4 text-center mb-12">
                  <button className='btn btn-primary'>
-                 <a
+                 <Link to='/more'
                    href="https://www.jlpt.jp/"
                    className="linkjlpt text-xl  font-semibold hover:underline"
                  >
                    More
-                 </a></button>
+                 </Link></button>
                </div>
         
               </div>

@@ -166,33 +166,44 @@ export function DeckList({ onSelectDeck, onEditDeck, onDeleteDeck }) {
       )}
   
       {/* Edit Form */}
-      {editingDeckId && (
-        <div className="card mt-10 w-96 bg-base-100 shadow-xl p-6 mx-auto ">
-          <h3 className="text-xl font-semibold mb-4">Edit Deck</h3>
-          <div className="space-y-4">
-            <input
-              type="text"
-              value={deckName}
-              onChange={(e) => setDeckName(e.target.value)}
-              className="input input-bordered w-full p-3 text-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Deck Name"
-            />
-            <input
-              type="text"
-              value={deckDescription}
-              onChange={(e) => setDeckDescription(e.target.value)}
-              className="input input-bordered w-full p-3 text-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Deck Description"
-            />
-            <button
-              onClick={() => handleEditSubmit(editingDeckId)}
-              className="btn btn-primary mt-2 w-full py-3 text-lg font-semibold hover:bg-primary-focus"
-            >
-              Save Changes
-            </button>
-          </div>
-        </div>
-      )}
+{editingDeckId && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="card w-96 bg-base-100 shadow-xl p-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl font-semibold mb-4">Edit Deck</h3>
+        <button 
+          onClick={() => setEditingDeckId(null)} 
+          className="text-xl font-semibold text-gray-600 hover:text-gray-800"
+        >
+          &times;
+        </button>
+      </div>
+      <div className="space-y-4">
+        <input
+          type="text"
+          value={deckName}
+          onChange={(e) => setDeckName(e.target.value)}
+          className="input input-bordered w-full p-3 text-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="Deck Name"
+        />
+        <input
+          type="text"
+          value={deckDescription}
+          onChange={(e) => setDeckDescription(e.target.value)}
+          className="input input-bordered w-full p-3 text-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="Deck Description"
+        />
+        <button
+          onClick={() => handleEditSubmit(editingDeckId)}
+          className="btn btn-primary mt-2 w-full py-3 text-lg font-semibold hover:bg-primary-focus"
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   )};
   

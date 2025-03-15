@@ -13,9 +13,9 @@ function TranscriptionAudio() {
     setFile(e.target.files[0]);
   };
 
-  const handleTextChange = (e) => {
-    setText(e.target.value);
-  };
+  // const handleTextChange = (e) => {
+  //   setText(e.target.value);
+  // };
 
   const handleSubmitFile = async (e) => {
     e.preventDefault();
@@ -43,55 +43,55 @@ function TranscriptionAudio() {
     }
   };
 
-  const handleSubmitText = async (e) => {
-    e.preventDefault();
-    if (!text) {
-      setError('Please enter some text.');
-      return;
-    }
+  // const handleSubmitText = async (e) => {
+  //   e.preventDefault();
+  //   if (!text) {
+  //     setError('Please enter some text.');
+  //     return;
+  //   }
 
-    try {
-      setIsLoading(true);
-      // Send the text as an object with the key 'myfile' (to match backend expectation)
-      const response = await axios.post('http://localhost:8000/convert_text_to_speech/', {
-        myfile: text, // Adjusting to match what backend expects
-      });
+  //   try {
+  //     setIsLoading(true);
+  //     // Send the text as an object with the key 'myfile' (to match backend expectation)
+  //     const response = await axios.post('http://localhost:8000/convert_text_to_speech/', {
+  //       myfile: text, // Adjusting to match what backend expects
+  //     });
 
-      setSpeechFile(response.data.file_path);  // Corrected to use `file_path` from response
-      setError('');
-    } catch (error) {
-      setError('Error converting text to speech: ' + error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     setSpeechFile(response.data.file_path);  // Corrected to use `file_path` from response
+  //     setError('');
+  //   } catch (error) {
+  //     setError('Error converting text to speech: ' + error.message);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
   
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-10">
+    <div className=" flex flex-col items-center justify-center bg-gray-50 py-10">
       <div className="w-full max-w-lg p-6 space-y-6 bg-white rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-center">Speech-to-Text and Text-to-Speech</h1>
+        <h1 className="text-3xl font-bold text-center text-primary">Speech-to-Text </h1>
 
         {/* Speech-to-Text */}
         <div>
-          <h2 className="text-xl font-semibold">Upload Audio for Speech-to-Text</h2>
+          <h2 className="text-xl font-semibold text-primary">Upload Audio for Speech-to-Text</h2>
           <form onSubmit={handleSubmitFile} className="space-y-4">
             <div className="form-control">
               <input
                 type="file"
                 onChange={handleFileChange}
                 accept="audio/*"
-                className="file-input file-input-bordered w-full"
+                className="file-input file-input-bordered w-full "
               />
             </div>
-            <button type="submit" className={`btn ${isLoading ? 'loading' : ''} w-full`}>Transcribe</button>
+            <button type="submit" className={`btn ${isLoading ? 'loading' : ''} btn-primary w-full`}>Transcribe</button>
           </form>
 
-          {transcription && <p className="mt-4 text-lg"><strong>Transcription:</strong> {transcription}</p>}
+          {transcription && <p className="mt-4 text-lg "><strong className='text-primary'>Transcription:</strong> {transcription}</p>}
         </div>
 
         {/* Text-to-Speech */}
-        <div>
+        {/* <div>
           <h2 className="text-xl font-semibold mt-8">Convert Text to Speech</h2>
           <form onSubmit={handleSubmitText} className="space-y-4">
             <div className="form-control">
@@ -113,7 +113,7 @@ function TranscriptionAudio() {
               </audio>
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Error Message */}
         {error && <p className="text-red-500 mt-4 text-center">{error}</p>}

@@ -4,7 +4,7 @@
 
 /* Flip card container */
 .flip-card {
-    width: 100%;
+    width: 150%;
     height: 250px; /* Adjust height according to your needs */
     perspective: 1000px; /* Add perspective for 3D effect */
   }
@@ -53,5 +53,24 @@
     font-size: 1rem;
     padding: 10px;
     border-radius: 12px;
+  }
+  
+  .modal-enter {
+    opacity: 0;
+    transform: translateY(-50%);
+  }
+  .modal-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  }
+  .modal-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .modal-exit-active {
+    opacity: 0;
+    transform: translateY(50%);
+    transition: opacity 0.3s ease-in, transform 0.3s ease-in;
   }
   

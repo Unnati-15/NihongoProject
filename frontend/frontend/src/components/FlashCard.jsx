@@ -89,14 +89,16 @@ import { CreateDeckForm } from './flashcard/CreateDeckForm';
 import { DeckList } from './flashcard/DeckList';
 import { CreateFlashcardForm } from './flashcard/CreateFlashcardForm';
 import { FlashcardList } from './flashcard/FlashcardList';
+import AdvancedNavbar from './AdvancedNavbar';
 
 export const FlashCard = () => {
   const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState(null);
+  const [flashcards,setFlashcards] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
   
   const handleCreateDeck = (decks) => {
-    const newDeck = { ...decks, flashcards: [] };
+    const newDeck = { ...decks, flashcards_s: [] };
     setDecks((prevDecks) => [...prevDecks, newDeck]);
     console.log(newDeck);
     setSuccessMessage(`Deck "${decks.name}" created successfully!`);
@@ -118,28 +120,28 @@ export const FlashCard = () => {
     
   };
 
-  const handleCreateFlashcard = (question, answer) => {
+  const handleCreateFlashcard = (front, back) => {
     const updatedDecks = decks.map((deck) => {
       if (deck.id === selectedDeck.id) {
-        deck.flashcards.push({ id: Date.now(), question, answer });
+        deck.flashcards.push({  front, back });
       }
       return deck;
     });
-    setDecks(updatedDecks);
+    setFlashcards(updatedDecks);
   };
 
-  const handleEditFlashcard = (flashcardId, newQuestion, newAnswer) => {
+  const handleEditFlashcard = (flashcardId, newFront, newBack) => {
     const updatedDecks = decks.map((deck) => {
       if (deck.id === selectedDeck.id) {
         deck.flashcards = deck.flashcards.map((flashcard) =>
           flashcard.id === flashcardId
-            ? { ...flashcard, question: newQuestion, answer: newAnswer }
+            ? { ...flashcard, front: newFront, back: newBack }
             : flashcard
         );
       }
       return deck;
     });
-    setDecks(updatedDecks);
+    setFlashcards(updatedDecks);
   };
 
   const handleDeleteFlashcard = (flashcardId) => {
@@ -149,10 +151,12 @@ export const FlashCard = () => {
       }
       return deck;
     });
-    setDecks(updatedDecks);
+    setFlashcards(updatedDecks);
   };
 
   return (
+    <>
+    <AdvancedNavbar/>
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-4xl font-bold text-center text-primary mb-6">Flashcard App</h1>
 
@@ -182,7 +186,8 @@ export const FlashCard = () => {
 
         <div>
           <FlashcardList
-            flashcards={selectedDeck.flashcards}
+            flashcards={flashcards}
+            onCreateFlashcard={handleCreateFlashcard}
             onEditFlashcard={handleEditFlashcard}
             onDeleteFlashcard={handleDeleteFlashcard}
           />
@@ -206,6 +211,6 @@ export const FlashCard = () => {
           </div>
         </>
       )} */}
-    </div>
+    </div></>
   );
 };
