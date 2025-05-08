@@ -81,12 +81,11 @@ const LearnerRegistration = () => {
 
     // If username is not available, stop the registration process
     if (!isUsernameAvailable) {
-      toast.error('Username is already exists, please choose a different one.', {
+      toast.error('Username already exists, please choose a different one.', {
         position: "top-right",
         autoClose: 3000,
-    });
+      });
       setErrorMessage('Username is already taken, please choose a different one.');
-      
       return;
     }
 
@@ -110,7 +109,7 @@ const LearnerRegistration = () => {
         toast.success('Learner registered successfully!', {
           position: "top-right",
           autoClose: 3000,
-      });
+        });
         setSuccessMessage('Learner registered successfully!');
         setErrorMessage('');
         setTimeout(() => {
@@ -122,45 +121,47 @@ const LearnerRegistration = () => {
       toast.error('Registration failed', {
         position: "top-right",
         autoClose: 3000,
-    });
-    setErrorMessage(error.response?.data?.detail || 'Registration failed');
+      });
+      setErrorMessage(error.response?.data?.detail || 'Registration failed');
     }
   };
 
   return (
-    <div className="min-h-screen items-center justify-center">
+    <div className=" flex items-center justify-center mb-40">
       <ToastContainer />
-      <div className="max-w-md mx-auto mt-12 p-6 bg-white shadow-lg rounded-lg overflow-auto">
-        <h2 className="text-3xl font-bold text-center mb-6">Learner Registration</h2>
+      <div className="max-w-4xl mx-auto p-16 bg-yellow-100 shadow-lg rounded-lg ">
+        <h2 className="text-3xl font-bold text-center mb-4">Learner Registration</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="username" className="block text-lg font-medium">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              className="input input-bordered w-full"
-            />
-            {/* Display an error message if username is not available */}
-            {!isUsernameAvailable && (
-              <p className="text-red-600 text-sm mt-2">Username is already taken, please choose a different one.</p>
-            )}
-          </div>
+          <div className="flex space-x-4">
+            <div className="w-1/2">
+              <label htmlFor="username" className="block text-lg font-medium">Username</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full"
+              />
+              {/* Display an error message if username is not available */}
+              {!isUsernameAvailable && (
+                <p className="text-red-600 text-sm mt-2">Username is already taken, please choose a different one.</p>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="password" className="block text-lg font-medium">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="input input-bordered w-full"
-            />
+            <div className="w-1/2">
+              <label htmlFor="password" className="block text-lg font-medium">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full"
+              />
+            </div>
           </div>
 
           <div>
@@ -176,28 +177,30 @@ const LearnerRegistration = () => {
             />
           </div>
 
-          <div>
-            <label htmlFor="first_name" className="block text-lg font-medium">First Name</label>
-            <input
-              type="text"
-              id="first_name"
-              name="first_name"
-              value={formData.first_name}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-            />
-          </div>
+          <div className="flex space-x-4">
+            <div className="w-1/2">
+              <label htmlFor="first_name" className="block text-lg font-medium">First Name</label>
+              <input
+                type="text"
+                id="first_name"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleChange}
+                className="input input-bordered w-full"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="last_name" className="block text-lg font-medium">Last Name</label>
-            <input
-              type="text"
-              id="last_name"
-              name="last_name"
-              value={formData.last_name}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-            />
+            <div className="w-1/2">
+              <label htmlFor="last_name" className="block text-lg font-medium">Last Name</label>
+              <input
+                type="text"
+                id="last_name"
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleChange}
+                className="input input-bordered w-full"
+              />
+            </div>
           </div>
 
           <div className="hidden">
@@ -247,17 +250,6 @@ const LearnerRegistration = () => {
             </p>
           </div>
         </form>
-
-        {/* {errorMessage && (
-          <div className="mt-4 text-center text-red-600">
-            <p>{errorMessage}</p>
-          </div>
-        )}
-        {successMessage && (
-          <div className="mt-4 text-center text-green-600">
-            <p>{successMessage}</p>
-          </div>
-        )} */}
       </div>
     </div>
   );

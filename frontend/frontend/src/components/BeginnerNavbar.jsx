@@ -4,7 +4,7 @@ import UserLogout from './UserLogout';
 import { useState,useEffect } from 'react';
 const BeginnerNavbar = () => {
     const [username, setUsername] = useState('');
-
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     useEffect(() => {
       // Check if the token is present in localStorage and retrieve the username
       const storedUsername = localStorage.getItem('username');
@@ -13,6 +13,9 @@ const BeginnerNavbar = () => {
       }
      }, []);
      console.log(username);
+     const toggleDropdown = () => {
+      setDropdownOpen((prevState) => !prevState);
+    };
   return (
     <div className=''>
       
@@ -22,15 +25,32 @@ const BeginnerNavbar = () => {
         
            <Link to="/beginner-pages" className="btn btn-ghost text-6xl font-semibold hover:text-yellow-500 transition-all font-mono">Kantanna Nihongo</Link>
         </div>
-        <button className="btn btn-success text-xl text-white rounded-full px-8 py-3 shadow-lg hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus">
+        <button onClick={toggleDropdown} className="btn btn-success text-xl text-white rounded-full px-8 py-3 shadow-lg hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary-focus">
   WELCOME {username} !
 </button>
-
+{dropdownOpen && (
+          <div className="mt-2 w-30  border border-gray-300 rounded-md shadow-lg">
+            <ul className="py-2">
+              <li>
+                <Link
+                  to="/profilepage"
+                  className=" px-4 py-2 text-white font-semibold hover:text-white transition-all"
+                  onClick={() => setDropdownOpen(false)} 
+                >
+                  Profile Page
+                </Link>
+              </li>
+              
+            </ul>
+          </div>
+        )}
         <div className="flex-none">
         <Link to="/beginner-pages"> <button className="btn btn-ghost text-2xl hover:bg-white hover:text-yellow-500 transition-all mr-4">
             Home
           </button></Link>  
-          
+          <Link to="/quizapp"> <button className="btn btn-ghost text-2xl hover:bg-white hover:text-yellow-500 transition-all">
+            Quiz
+          </button></Link>  
        <Link to="/phrases"> <button className="btn btn-ghost text-2xl hover:bg-white hover:text-yellow-500 transition-all">
             Phrases
           </button></Link>  

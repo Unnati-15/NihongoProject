@@ -11,3 +11,5 @@ class Learner(models.Model):
         max_length=10,
         choices=SkillLevel.choices,  
     )
+    def __str__(self):
+        return self.user.username

@@ -86,3 +86,27 @@ class AnswerSubmission(models.Model):
 
     def __str__(self):
         return f"Answer {self.id} for Question {self.question.id} by {self.quiz_attempt.learner.username}"
+    
+class LearnerQuizAttempt(models.Model):
+    learner = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz,on_delete=models.CASCADE)
+    score = models.IntegerField()
+    attempt_date = models.DateTimeField(auto_now_add=True)
+    total_attempts = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"Attempt by {self.learner.username} for {self.quiz}"
+    def save(self,*args,**kwargs):
+        total_attempts = LearnerQuizAttempt.objects.filter(learner=self.learner,quiz=self.quiz).count()+1
+        self.total_attempts = total_attempts
+        super().save(*args,**kwargs)
+
+class LearnerQuizQuestionDetail(models.Model):
+    attempt = models.ForeignKey(LearnerQuizAttempt, related_name="question_details", on_delete=models.CASCADE)
+    question = models.ForeignKey(Question,on_delete=models.CASCADE)
+    selected_answer = models.ForeignKey(Answer,related_name='selected_answer',on_delete=models.CASCADE)
+    correct_answer = models.ForeignKey(Answer,related_name='correct_answer',on_delete=models.CASCADE)
+    is_correct = models.BooleanField()
+
+    def __str__(self):
+        return f"Question: {self.question} , Correct:{self.is_correct}"

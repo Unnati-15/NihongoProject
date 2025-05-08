@@ -22,16 +22,21 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 # from flashcard.views import FlashcardViewSet
+from company.views import BookingViewSet, CompanyRegistrationView, CompanyViewSet, JobPostingListAll, JobPostingViewSet,JobPostCompanyDetailView
 from flashcardapp.views import FlashcardAppViewSet, FlashcardDeckViewSet
-from quiz_app.views import AnswerViewSet, LearnerQuizAttemptsView, LevelViewSet,CategoryViewSet,QuizViewSet,QuestionViewSet, SubmitQuiz,GetUserByUsernameView, SubmitQuizView
+from interpreter.views import AddAvailabilityToInterpreterView, AddCertificationToInterpreterView, AddLanguageToInterpreterView, AvailabilityUpdateAPIView, InterpreterListAll, InterpreterListView,  InterpreterRegistrationView, InterpreterUpdateAPIView,  LanguageListView
+from quiz_app.views import AnswerViewSet, LearnerQuizAttemptsView, LevelViewSet,CategoryViewSet,QuizViewSet,QuestionViewSet, GetUserByUsernameView, SubmitQuizView
 from writeapp.views import WriteappViewSet
 from users.views import UserRegistrationView, UserLogoutView,UserLoginView
-from learner.views import LearnerRegistrationView
+from learner.views import LearnerRegistrationView, LearnerViewSet, UpdateSkillLevel
 from .views import TextToSpeechView
 from flashcard.views import CreateDeckAPIView, FlashcardViewSet,GetCurrentDeckAPIView, GetCurrentUserAPIView,DeckViewSet,CreateFlashcardAPIView
 
 # Create a router and register our viewsets
 router = DefaultRouter()
+router.register(r'learner',LearnerViewSet,basename='learner')
+router.register(r'job_posting',JobPostingViewSet,basename='job-posting')
+router.register(r'bookings', BookingViewSet, basename='booking')
 router.register(r'decks', DeckViewSet,basename='deck')
 router.register(r'flashcards',FlashcardViewSet,basename='flashcard')
 router.register(r'write', WriteappViewSet,basename='write')
@@ -42,9 +47,10 @@ router.register(r'levels/(?P<level_id>\d+)/categories/(?P<category_id>\d+)/quizz
 router.register(r'quizzes', QuizViewSet, basename='quiz')
 router.register(r'questions', QuestionViewSet, basename='question')
 router.register(r'answers',AnswerViewSet,basename='answer')
-# router.register(r'flashcards', FlashcardViewSet,basename='flashcard')
-# router.register(r'decks', DeckViewSet,basename='deck')
-# Define nested routes for quiz -> question -> answer
+router.register(r'company',CompanyViewSet,basename='company-list')
+router.register(r'company/(?P<company_id>\d+)/job_posting',JobPostingViewSet,basename='company-specific-job-posting')
+router.register(r'interpreters',InterpreterListAll,basename='interpreter-list')
+router.register(r'job_posts',JobPostingListAll,basename='job-post-list')
 quiz_question_answer_router = DefaultRouter()
 quiz_question_answer_router.register(
     r'levels/(?P<level_id>\d+)/categories/(?P<category_id>\d+)/quizzes/(?P<quiz_id>\d+)/questions', 
@@ -78,10 +84,21 @@ urlpatterns = [
     path('text-to-speech/', TextToSpeechView.as_view(), name='text_to_speech'),
     path('transcribe/',views.transcribe_audio),
     path('current-user/', GetCurrentUserAPIView.as_view(), name='current-user'),
+    path('api/languages/', LanguageListView.as_view(), name='language-list'),
+    path('api/interpreter/',InterpreterListView.as_view(),name='interpreter-detail'),
+    path('api/interpreter/<int:interpreter_id>/add_language/', AddLanguageToInterpreterView.as_view(), name='add-language-to-interpreter'),
+    path('api/interpreter/<int:interpreter_id>/add_certificate/', AddCertificationToInterpreterView.as_view(), name='add-certification-to-interpreter'),
+    path('api/interpreter/<int:interpreter_id>/add_availability/', AddAvailabilityToInterpreterView.as_view(), name='add-availability-to-interpreter'),
+    path('api/interpreter/<int:interpreter_id>/availability/<int:availability_id>/', AvailabilityUpdateAPIView.as_view(), name='update_availability'),
+    path('api/interpreter-update/<int:pk>/',InterpreterUpdateAPIView.as_view(),name='interpreter-update'),
     path('current-deck/',GetCurrentDeckAPIView.as_view(),name='current-deck'),
     path('submit-quiz/', SubmitQuizView.as_view(), name='submit_quiz'),
     path('user_by_username/<str:username>/', GetUserByUsernameView.as_view(), name='get_user_by_username'),
+    path('update-skill-level/<int:pk>/', UpdateSkillLevel.as_view(), name='update-skill-level'),
     path('learner-quiz-attempts/', LearnerQuizAttemptsView.as_view(), name='learner-quiz-attempts'),
+    path('api/job_posts/<int:job_post_id>/company/', JobPostCompanyDetailView.as_view(), name='job_post_company_detail'),
+
+
     # path('flashcard/', FlashCardList.as_view(), name='flashcard-list'),  # GET and POST
     # path('flashcard/<int:pk>/', FlashCardDetail.as_view(), name='flashcard-detail'),  # GET, PUT, DELETE
     # path('logout/',logout_view),
@@ -102,6 +119,8 @@ urlpatterns = [
     path('api/auth/login/', UserLoginView.as_view(), name='user-login'),
     path('api/auth/logout/', UserLogoutView.as_view(), name='user-logout'),
     path('api/auth/register/learner/', LearnerRegistrationView.as_view(), name='learner-registration'),
+    path('api/auth/register/interpreter/',InterpreterRegistrationView.as_view(),name='interpreter-registration'),
+    path('api/auth/register/company/',CompanyRegistrationView.as_view(),name='company-registration'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 # Serve media files during development
 if settings.DEBUG:

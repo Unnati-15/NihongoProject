@@ -51,11 +51,14 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'users',
     'learner',
+    'interpreter',
+    'company',
     'flashcard',
     'flashcardapp',
     'writeapp',
     'quiz_app',
 ]
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [

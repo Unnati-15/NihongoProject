@@ -107,8 +107,6 @@ export const HomePageAdvanced = () => {
                <div className="exams4 text-center">
                  <button className='btn btn-primary'>
                  <Link to="/flashcard_app"
-                   href="https://www.jlpt.jp/"
-                   className="linkjlpt text-xl  font-semibold hover:underline"
                  >
                   Flashcard
                  </Link></button>
@@ -146,8 +144,6 @@ export const HomePageAdvanced = () => {
                <div className="exams4 text-center ">
                  <button className='btn btn-primary'>
                  <Link to='/write'
-                   href="https://www.jlpt.jp/"
-                   className="linkjlpt text-xl  font-semibold hover:underline"
                  >
                    Write
                  </Link></button>
@@ -186,8 +182,6 @@ export const HomePageAdvanced = () => {
                <div className="exams4 text-center mb-12">
                  <button className='btn btn-primary'>
                  <Link to='/more'
-                   href="https://www.jlpt.jp/"
-                   className="linkjlpt text-xl  font-semibold hover:underline"
                  >
                    More
                  </Link></button>

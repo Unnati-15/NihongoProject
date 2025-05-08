@@ -26,16 +26,27 @@ import Write from "./components/Write";
 import FlashcardApp from "./components/FlashcardApp";
 import QuizDetail from "./components/QuizDetail";
 import { QuizApp } from "./components/QuizApp";
+import LearnerProfile from "./components/LearnerProfile";
+import InterpreterForm from "./components/InterpreterForm";
+import { InterpreterPages } from "./components/InterpreterPages";
+import CompanyForm from "./components/CompanyForm";
+import { CompanyPages } from './components/CompanyPages';
+import InterpreterProfile from "./components/InterpreterProfile";
+import CompanyList from "./components/CompanyList";
+import BeginnerProfile from "./components/BeginnerProfile";
 const App = () => {
   const [token, setToken] = useState('');
   const [skillLevel, setSkillLevel] = useState('');
+  const [role,setRole] = useState(''); 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedSkillLevel = localStorage.getItem('skill_level');
+    const storedRole = localStorage.getItem('role');
 
-    if (storedToken && storedSkillLevel) {
+    if (storedToken && storedSkillLevel && storedRole) {
       setToken(storedToken);
       setSkillLevel(storedSkillLevel);
+      setRole(storedRole);
     }
   }, []);
 
@@ -44,7 +55,7 @@ const App = () => {
       <Helmet>
         <title>Kantanna Nihongo</title>
       </Helmet>
-      <MainApp token={token} skillLevel={skillLevel} setToken={setToken} />
+      <MainApp token={token} skillLevel={skillLevel} role={role} setToken={setToken} />
     </Router>
   );
 };
@@ -52,9 +63,9 @@ const App = () => {
 // MainApp: The part of the app where routing happens
 
 // eslint-disable-next-line react/prop-types
-const MainApp = ({ token, skillLevel, setToken }) => {
+const MainApp = ({ token, skillLevel,role, setToken }) => {
   const location = useLocation(); // This will now work because it's inside Router
-  const showMainNavbar = !['/beginner-pages', '/advanced-pages','/phrases','/hiragana','/katakana','/kanji','/quiz','/write','/flashcard','/more'].includes(location.pathname);
+  const showMainNavbar = !['/beginner-pages', '/advanced-pages','/phrases','/hiragana','/katakana','/kanji','/quiz','/quizapp','/profile','/profilepage','/interpreter-pages','/interpreter-profile','/company-list','/company-pages','/job-posts','/write','/flashcard','/more'].includes(location.pathname);
 
   return (
     <>
@@ -62,6 +73,8 @@ const MainApp = ({ token, skillLevel, setToken }) => {
       <Routes>
         <Route path="/login" element={<UserLogin setToken={setToken} />} />
         <Route path="/register" element={<LearnerRegistration />} />
+        <Route path="/register/interpreter/" element={<InterpreterForm/>}/>
+        <Route path="/register/company/" element={<CompanyForm/>}/>
         <Route path="/logout" element={<UserLogout setToken={setToken}  />} />
         
         {/* Protecting the /beginner-pages route */}
@@ -102,11 +115,10 @@ const MainApp = ({ token, skillLevel, setToken }) => {
           path="/quiz"
           element={token ? (skillLevel === 'advanced' ? <QuizApp /> : <AdvancedPages />) : <Navigate to="/login" />}
         />
-        {/* <Route path="/quiz/:quizId" exact element={token ? (skillLevel === 'advanced' ? <QuizDetail /> : <AdvancedPages />) : <Navigate to="/login" />} /> */}
-        {/* <Route
-          path="/quiz-result"  
-          element={token ? (skillLevel === 'advanced' ? <QuizResult /> : <AdvancedPages />) : <Navigate to="/login" />}
-        /> */}
+        <Route
+          path="/quizapp"
+          element={token ? (skillLevel === 'beginner' ? <Quiz /> : <BeginnerPages />) : <Navigate to="/login" />}
+        />
         <Route
           path="/flashcard"
           element={token ? (skillLevel === 'advanced' ? <FlashCard/> : <AdvancedPages />) : <Navigate to="/login" />}
@@ -127,6 +139,13 @@ const MainApp = ({ token, skillLevel, setToken }) => {
         <Route path="/translate-pdf" element={<FileUpload />}/>
         <Route path="/resources" element={ <Resources/>}/>
         <Route path="/flashcard_app" element={token ? (skillLevel === 'advanced' ? <FlashcardApp/> : <AdvancedPages />) : <Navigate to="/login" />}/>
+        <Route path="/profile" element={token ?  <LearnerProfile/> : <QuizApp />}/>
+        <Route path="/profilepage" element={token ?  <BeginnerProfile/> : <QuizApp />}/>
+        <Route path="/interpreter-profile" element={token ? (role=== 'interpreter' ? <InterpreterProfile/> : <InterpreterPages />)  : <Navigate to="/login"/> }/>  
+        <Route path="/company-list" element={token ? (role=== 'company' ? <CompanyPages/> : <CompanyPages/>)  : <Navigate to="/login"/>}/>
+        <Route path="/interpreter-pages" element={token ? (role=== 'interpreter' ? <InterpreterPages/> : <InterpreterPages />)  : <Navigate to="/login"/>}/>  
+        <Route path="/company-pages" element={token ? (role=== 'company' ?  <CompanyPages/> : <MainPage />)  : <Navigate to="/login"/>}/>
+        <Route path="/job-posts" element={token ? (role=== 'company' ? <CompanyList/>: <MainPage />)  : <Navigate to="/login"/>}/>
       </Routes>
       <Footer />
     </>

@@ -4,14 +4,14 @@ from rest_framework import viewsets,status
 from django.http import JsonResponse
 from rest_framework.exceptions import AuthenticationFailed
 from learner.models import Learner
-from .models import Answer, AnswerSubmission, Level, Category, Quiz, Question, QuizAttempt, QuizSubmission
-from .serializers import AnswerSerializer, LevelSerializer, CategorySerializer, QuizAttemptSerializer, QuizSerializer, QuestionSerializer
+from .models import Answer, AnswerSubmission, LearnerQuizAttempt, LearnerQuizQuestionDetail, Level, Category, Quiz, Question, QuizAttempt, QuizSubmission
+from .serializers import AnswerSerializer, LearnerQuizAttemptSerializer, LevelSerializer, CategorySerializer, QuizAttemptSerializer, QuizSerializer, QuestionSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from users.models import User
 from rest_framework.views import APIView
-
+from django.db.models import Sum 
 
 class LevelViewSet(viewsets.ModelViewSet):
     queryset = Level.objects.all()
@@ -25,7 +25,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         level_id = self.kwargs.get('level_id')
         return Category.objects.filter(level_id=level_id)
-
+2
 
 class QuizViewSet(viewsets.ModelViewSet):
     queryset = Quiz.objects.all()
@@ -180,6 +180,83 @@ class GetUserByUsernameView(APIView):
             return Response({'error': 'User not found'}, status=404)
         
 # from django.shortcuts import get_object_or_404
+# class SubmitQuizView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def post(self, request, *args, **kwargs):
+#         quiz_id = request.data.get("quiz_id")
+#         answers = request.data.get("answers")
+
+#         # Ensure quiz exists
+#         try:
+#             quiz = Quiz.objects.get(id=quiz_id)
+#         except Quiz.DoesNotExist:
+#             return Response({"detail": "Quiz not found"}, status=404)
+
+#         learner = request.user
+#         score = 0
+#         question_details = []
+
+#         # Loop through answers and calculate score
+#         for answer in answers:
+#             question_id = answer['question_id']
+#             answer_id = answer['answer_id']
+#             try:
+#                 # Get the question by its ID
+#                 question = Question.objects.get(id=question_id)
+                
+#                 # Find the correct answer (where is_correct=True)
+#                 correct_answer = question.answers.filter(is_correct=True).first()
+
+#                 # Check if the selected answer is correct
+#                 is_correct = correct_answer.id == answer_id
+#                 score += is_correct
+
+#                 # Serialize answers for this question
+#                 serialized_answers = AnswerSerializer(question.answers.all(), many=True).data
+
+#                 # Append question details
+#                 question_details.append({
+#                     'question_id': question.id,
+#                     'question_text': question.question_text,
+#                     'selected_answer': answer_id,
+#                     'correct_answer': correct_answer.id,
+#                     'is_correct': is_correct,
+#                     'answers': serialized_answers,  # Include all answers for the question
+#                 })
+#             except Question.DoesNotExist:
+#                 continue
+
+#         # Create attempt entry
+#         attempt = QuizAttempt.objects.create(
+#             learner=learner,
+#             quiz=quiz,
+#             score=score,
+#             attempt_date=timezone.now()
+#         )
+
+#         # Serialize attempt data
+#         attempt_data = QuizAttemptSerializer(attempt).data
+
+#         # Prepare response
+#         response_data = {
+#             'learner': {
+#                 'id': learner.id,
+#                 'username': learner.username,
+#                 'email': learner.email,
+#             },
+#             'quiz': {
+#                 'id': quiz.id,
+#                 'title': quiz.title,
+#                 'score': score,
+#                 'attempt_date': attempt.attempt_date,
+#             },
+#             'question_details': question_details,
+#             'total_attempts': QuizAttempt.objects.filter(learner=learner, quiz=quiz).count(),
+#             'attempt_info': attempt_data
+#         }
+
+#         return Response(response_data)
 class SubmitQuizView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -197,6 +274,11 @@ class SubmitQuizView(APIView):
         score = 0
         question_details = []
 
+        # Get all the questions for the quiz
+        questions = Question.objects.filter(quiz=quiz)
+        total_questions = questions.count()
+        total_score = total_questions * 10  # Since each question is worth 10 marks
+
         # Loop through answers and calculate score
         for answer in answers:
             question_id = answer['question_id']
@@ -210,35 +292,41 @@ class SubmitQuizView(APIView):
 
                 # Check if the selected answer is correct
                 is_correct = correct_answer.id == answer_id
-                score += is_correct
+                score += 10 if is_correct else 0  # Each correct answer gets 10 marks
 
                 # Serialize answers for this question
-                serialized_answers = AnswerSerializer(question.answers.all(), many=True).data
+                serialized_answers = Answer.objects.filter(question=question).all()
 
                 # Append question details
-                question_details.append({
-                    'question_id': question.id,
-                    'question_text': question.question_text,
-                    'selected_answer': answer_id,
-                    'correct_answer': correct_answer.id,
-                    'is_correct': is_correct,
-                    'answers': serialized_answers,  # Include all answers for the question
-                })
+                question_detail = LearnerQuizQuestionDetail(
+                    attempt=None,  # We'll set this after creating QuizAttempt
+                    question=question,
+                    selected_answer=Answer.objects.get(id=answer_id),
+                    correct_answer=correct_answer,
+                    is_correct=is_correct,
+                )
+                question_details.append(question_detail)
+
             except Question.DoesNotExist:
                 continue
 
         # Create attempt entry
-        attempt = QuizAttempt.objects.create(
+        attempt = LearnerQuizAttempt.objects.create(
             learner=learner,
             quiz=quiz,
             score=score,
             attempt_date=timezone.now()
         )
 
-        # Serialize attempt data
-        attempt_data = QuizAttemptSerializer(attempt).data
+        # Now set the attempt for all the question details
+        for question_detail in question_details:
+            question_detail.attempt = attempt
+            question_detail.save()
 
-        # Prepare response
+        # Serialize attempt data
+        attempt_data = LearnerQuizAttemptSerializer(attempt).data
+
+        # Prepare response data
         response_data = {
             'learner': {
                 'id': learner.id,
@@ -248,21 +336,31 @@ class SubmitQuizView(APIView):
             'quiz': {
                 'id': quiz.id,
                 'title': quiz.title,
-                'score': score,
+                'score': score,  # Obtained score
+                'total_score': total_score,  # Total score
                 'attempt_date': attempt.attempt_date,
             },
-            'question_details': question_details,
-            'total_attempts': QuizAttempt.objects.filter(learner=learner, quiz=quiz).count(),
+            'question_details': [{
+                'question_id': qd.question.id,
+                'question_text': qd.question.question_text,
+                'selected_answer': qd.selected_answer.answer_text,
+                'correct_answer': qd.correct_answer.answer_text,
+                'is_correct': qd.is_correct
+            } for qd in question_details],
+            'total_attempts': LearnerQuizAttempt.objects.filter(learner=learner, quiz=quiz).count(),
             'attempt_info': attempt_data
         }
 
         return Response(response_data)
-    
+
+   
 class LearnerQuizAttemptsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         learner = request.user
-        quiz_attempts = QuizAttempt.objects.filter(learner=learner).order_by('-attempt_date')
-        serializer = QuizAttemptSerializer(quiz_attempts, many=True)
+        quiz_attempts = LearnerQuizAttempt.objects.filter(learner=learner).order_by('-attempt_date')
+        serializer = LearnerQuizAttemptSerializer(quiz_attempts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+

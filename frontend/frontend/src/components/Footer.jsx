@@ -2,9 +2,12 @@ import 'react';
 import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
-    <footer className="footer footer-center p-2 bg-gradient-to-r from-yellow-300 to-yellow-500 text-sky-500 text-xl fixed bottom-0 left-0 w-full rounded-t-lg shadow-lg">
+    <footer className="footer footer-center p-2 bg-gradient-to-r from-red-200 to-red-400 text-white text-xl fixed bottom-0 left-0 w-full rounded-t-lg shadow-lg">
       <div className="flex flex-col items-center gap-8">
         <nav className="grid grid-flow-col gap-10 text-xl font-semibold tracking-wide">
+        <Link to="/translate" className="hover:bg-white hover:text-blue-500 transition-all rounded-lg px-4 py-2">
+            Translation
+          </Link>
           <Link to="/about" className="hover:bg-white hover:text-blue-500 transition-all rounded-lg px-4 py-2">
             About us
           </Link>
@@ -28,11 +31,14 @@ const Footer = () => {
           <Link to="/contact" className="hover:bg-white hover:text-blue-500 transition-all rounded-lg px-4 py-2">
             Contact
             </Link>
+            <Link to="/resources" className="hover:bg-white hover:text-blue-500 transition-all rounded-lg px-4 py-2">
+            Study Material
+            </Link>
         </nav>
 
      
 
-        <aside className="mt-2 text-sm text-sky-500 opacity-80">
+        <aside className="mt-2 text-sm text-white opacity-80">
           <p>Copyright © {new Date().getFullYear()} - All rights reserved by KANTAN NA NIHONGO</p>
         </aside>
       </div>

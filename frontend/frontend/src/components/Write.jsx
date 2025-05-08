@@ -152,7 +152,7 @@ const Write = () => {
   return (
     <>
       <AdvancedNavbar />
-      <div className="max-w-3xl mx-auto p-8 bg-white rounded-lg shadow-lg mt-10 mb-40 overflow-hidden">
+      <div className="max-w-3xl mx-auto p-8  rounded-lg shadow-lg mt-10 mb-40 overflow-hidden bg-yellow-100">
         <h1 className="text-3xl font-semibold text-center mb-8">Practice Writing</h1>
 
         <div className="mb-8 max-h-[60vh] overflow-y-auto">

@@ -6,7 +6,7 @@ const Resources = () => {
   return (
     <>
      
-      <div className="min-h-screen bg-gray-100 py-12 px-6">
+      <div className="min-h-screen bg-gray-100 py-12 px-6 mb-16">
         <div className="w-full max-w-screen-xl mx-auto bg-white rounded-lg shadow-lg p-6">
           {/* Tabs */}
           <div className="flex mb-6">

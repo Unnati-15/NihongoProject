@@ -68,7 +68,7 @@ function TranscriptionAudio() {
   
 
   return (
-    <div className=" flex flex-col items-center justify-center bg-gray-50 py-10">
+    <div className=" flex flex-col items-center justify-center bg-yellow-100 py-10">
       <div className="w-full max-w-lg p-6 space-y-6 bg-white rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-center text-primary">Speech-to-Text </h1>
 

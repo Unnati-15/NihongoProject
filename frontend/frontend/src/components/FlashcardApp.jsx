@@ -67,7 +67,7 @@ const FlashcardApp = () => {
   }
 
   return (
-    <div className="container mx-auto p-8">
+    <div className="container mx-auto p-8 bg-slate-100 mb-12">
       <h1 className="text-4xl font-semibold text-center mb-8 text-primary">Flashcard App</h1>
 
       {/* Display Decks */}

@@ -101,7 +101,7 @@ export const More = () => {
   
             {/* Page 2 Content */}
             {activeTab === 2 && (
-              <main className=" items-center justify-center bg-gray-100 py-12 px-6">
+              <main className=" items-center justify-center bg-yellow-100 py-12 px-6">
                 {/* <div className=" flex flex-col items-center justify-center bg-gray-50 py-10">
       <div className="w-full max-w-lg p-6 space-y-6 bg-white rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-center text-primary">Text-to-Speech</h1>
@@ -138,7 +138,7 @@ export const More = () => {
             {/* Page 3 Content */}
             {activeTab === 3 && (
               
-              <div className="flex flex-col items-center justify-center bg-gray-100 py-10 mb-12">
+              <div className="flex flex-col items-center justify-center bg-yellow-100 py-10 mb-12">
       <div className="w-full max-w-2xl p-6 space-y-6 bg-white rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-center text-primary">Japanese Text Summarization</h1>
 

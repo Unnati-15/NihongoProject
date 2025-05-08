@@ -84,7 +84,7 @@ const FileUpload = () => {
     };
 
     return (
-        <div className="max-w-lg mx-auto p-4 bg-white rounded-lg shadow-lg mt-20">
+        <div className="max-w-lg mx-auto p-4 bg-white rounded-lg shadow-lg mt-20 mb-16">
             <h2 className="text-xl font-semibold text-center mb-4">Upload and Translate PDF</h2>
             <div className="mb-4">
                 <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700">Choose a PDF file</label>

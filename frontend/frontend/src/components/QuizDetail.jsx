@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import AdvancedNavbar from './AdvancedNavbar';
 
 const QuizDetail = () => {
     const { quizId,levelId,categoryId } = useParams();
@@ -66,6 +67,8 @@ const QuizDetail = () => {
     }
 
     return (
+        <>
+        <AdvancedNavbar/>
         <div>
             {quiz && (
                 <>
@@ -107,7 +110,7 @@ const QuizDetail = () => {
                     )}
                 </>
             )}
-        </div>
+        </div></>
     );
 };
 

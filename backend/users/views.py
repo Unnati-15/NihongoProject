@@ -103,12 +103,19 @@ from learner.serializers import LearnerSerializer
 #         else:
 #             return Response({'message': 'Invalid username or password'}, status=401)
 class UserLoginView(APIView):
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        
+        print(username)
+        print(password)
         # Authenticate the user
+        print(f"Authenticating user: {username}")
         user = authenticate(request, username=username, password=password)
+        if user is None:
+            print(f"Authentication failed for username: {username}")
+        else:
+            print(f"Authenticated user: {user.username}")   
+
 
         if user is not None:
             # User authenticated, log them in
@@ -116,6 +123,7 @@ class UserLoginView(APIView):
             
             # Generate or get an existing token
             token, created = Token.objects.get_or_create(user=user)
+            print(f"Token created: {created}, Token key: {token.key}")
             if created:
                 token.delete()  # If token was created but already exists, delete and create a new one
                 token = Token.objects.create(user=user)
@@ -129,21 +137,28 @@ class UserLoginView(APIView):
 
             # Check if the user is a learner and add learner data to the response
             if user.role == 'learner':
-                # Make sure the user has a related Learner instance
                 try:
                     learner = user.learner_account  # Assuming related name is 'learner_account'
                     learner_serializer = LearnerSerializer(learner)
-                    response_data['skill_level'] = learner_serializer.data.get('skill_level','unknown')
+                    response_data['skill_level'] = learner_serializer.data.get('skill_level', 'unknown')
                     response_data['data'] = learner_serializer.data  # Add additional learner data
                 except Learner.DoesNotExist:
                     response_data['skill_level'] = 'unknown'
                     response_data['data'] = {}
 
+            # Check if the user is an interpreter and add interpreter-specific data to the response
+            if user.role == 'interpreter':
+                # You can customize this section as per your requirements for interpreters
+                response_data['data'] = {'message': 'Interpreter login successful'}
+
+            if user.role == 'company':
+                # You can customize this section as per your requirements for interpreters
+                response_data['data'] = {'message': 'Company login successful'}
+
             return Response(response_data)
-        
+
         else:
             return Response({'message': 'Invalid username or password'}, status=401)
-        
 
 # class UserLogoutView(APIView):
 #     permission_classes = [IsAuthenticated]

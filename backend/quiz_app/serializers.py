@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from learner.serializers import LearnerSerializer
 from users.models import User
-from .models import AnswerSubmission, Level, Category, Quiz, Question, Answer, QuizAttempt, QuizSubmission
+from .models import AnswerSubmission, LearnerQuizAttempt, LearnerQuizQuestionDetail, Level, Category, Quiz, Question, Answer, QuizAttempt, QuizSubmission
 # Level Serializer
 class LevelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -60,3 +60,45 @@ class QuizAttemptSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizAttempt
         fields = ['id', 'quiz', 'score', 'attempt_date', 'answers']
+
+
+class LearnerQuizQuestionDetailSerializer(serializers.ModelSerializer):
+    question = QuestionSerializer()  # Nested serializer to include question details
+    selected_answer = AnswerSerializer()
+    correct_answer = AnswerSerializer()
+
+    class Meta:
+        model = LearnerQuizQuestionDetail
+        fields = ['question', 'selected_answer', 'correct_answer', 'is_correct']
+
+
+# Serializer for QuizAttempt model
+class LearnerQuizAttemptSerializer(serializers.ModelSerializer):
+    # Custom serializer for learner (displaying username, email, etc.)
+    learner = serializers.SerializerMethodField()
+    quiz = serializers.SerializerMethodField()
+
+    # List of question details (serialize question-answer info)
+    question_details = LearnerQuizQuestionDetailSerializer(many=True)
+
+    class Meta:
+        model = LearnerQuizAttempt
+        fields = ['id', 'learner', 'quiz', 'score', 'attempt_date', 'total_attempts', 'question_details']
+
+    # Custom method to return learner's information (e.g., username, email)
+    def get_learner(self, obj):
+        # Fetching learner's details from related model
+        learner = obj.learner
+        return {
+            'id': learner.id,
+            'username': learner.username,
+            'email': learner.email
+        }
+
+    def get_quiz(self, obj):
+        # Fetching quiz's details from related model
+        quiz = obj.quiz
+        return {
+            'id': quiz.id,
+            'title': quiz.title
+        }

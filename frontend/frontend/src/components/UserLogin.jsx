@@ -26,7 +26,7 @@ const UserLogin = () => {
 
             console.log(username);
             console.log(password);
-            
+            console.log(response.data);
             // Extract token and skill level from the response
             const { token, role, skill_level } = response.data;
 
@@ -53,10 +53,10 @@ const UserLogin = () => {
                         }
                         break;
                     case 'interpreter':
-                        navigate('/');
+                        navigate('/interpreter-pages');
                         break;
                     case 'company':
-                        navigate('/');
+                        navigate('/company-pages');
                         break;
                     default:
                         navigate('/');
@@ -77,9 +77,9 @@ const UserLogin = () => {
     };
 
     return (
-        <div className="flex justify-center items-center mt-40">
+        <div className="flex justify-center items-center mt-16" >
         <ToastContainer />
-            <div className="card w-96 bg-white shadow-xl p-8">
+            <div className="card w-96 bg-yellow-100 shadow-xl p-16">
                 <h2 className="text-3xl font-semibold text-center mb-6">Login</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
@@ -108,7 +108,7 @@ const UserLogin = () => {
                 {successMessage && <p className="text-green-500 text-center mt-4">{successMessage}</p>} */}
                 <p className="text-center mt-4">
                     <span>Do not have an account?</span>
-                    <Link to="/register" className="text-blue-500 ml-1 text-lg">Register</Link>
+                    <Link to="/register" className="text-blue-600 hover:text-blue-800 font-medium hover:underline">Register</Link>
                 </p>
             </div>
         </div>

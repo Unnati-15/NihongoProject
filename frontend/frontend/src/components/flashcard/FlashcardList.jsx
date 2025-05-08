@@ -151,7 +151,7 @@ export function FlashcardList({ onEditFlashcard }) {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Flashcards</h2>
+      
       {flashcards.length === 0 ? (
         <div className="alert alert-warning">
           <span>No flashcards available in this deck.</span>
@@ -161,8 +161,8 @@ export function FlashcardList({ onEditFlashcard }) {
         <table className="min-w-full table-auto border-separate border-spacing-0 w-full text-sm text-center rtl:text-right text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr className="bg-gray-100 text-gray-700">
-              <th className="px-6 py-3 text-center text-2xl font-semibold">Content</th>
-              <th>actions</th>
+              <th className="px-6 py-3 text-center text-2xl font-semibold">Flashcards</th>
+              <th className="px-6 py-3 text-center text-2xl font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
