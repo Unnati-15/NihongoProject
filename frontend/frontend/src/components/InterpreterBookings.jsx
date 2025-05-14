@@ -38,7 +38,7 @@ const InterpreterBookings = () => {
       {bookings.length === 0 ? (
         <p>No bookings found.</p>
       ) : (
-        <div style={styles.cardContainer}>
+        <div style={styles.cardContainer} className='mb-40'>
           {bookings.map((booking) => (
             <div key={booking.id} style={styles.card}>
               <h3 style={styles.jobTitle}>{booking.job_posting.job_title}</h3>

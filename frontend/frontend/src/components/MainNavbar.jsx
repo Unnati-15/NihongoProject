@@ -8,8 +8,8 @@ const MainNavbar = () => {
            <Link to="/" className="btn btn-ghost text-6xl font-semibold hover:text-yellow-500 transition-all font-mono">Kantanna Nihongo</Link>
         </div>
         <div className="flex-none">
-        <Link to="/"> <button className="btn btn-ghost text-2xl hover:bg-white hover:text-yellow-500 transition-all mr-4">
-            Home
+        <Link to="/login"> <button className="btn btn-ghost text-2xl hover:bg-white hover:text-yellow-500 transition-all mr-4">
+            Login Here
           </button></Link>  
           <Link to="/translate">  <button className="btn btn-ghost text-2xl hover:bg-white hover:text-yellow-500 transition-all mr-4">
             Translation

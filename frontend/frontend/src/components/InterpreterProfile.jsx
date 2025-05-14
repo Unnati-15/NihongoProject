@@ -85,6 +85,7 @@ const InterpreterProfile = () => {
       setUpdatedData((prev) => ({
         ...prev,
         language: [...prev.language, addedLanguage],
+        
       }));
     } catch (error) {
       setError(error.message);

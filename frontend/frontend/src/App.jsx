@@ -36,6 +36,7 @@ import CompanyList from "./components/CompanyList";
 import BeginnerProfile from "./components/BeginnerProfile";
 import Booking from "./components/Booking";
 import InterpreterBookings from "./components/InterpreterBookings";
+import CompanyProfile from "./components/CompanyProfile";
 const App = () => {
   const [token, setToken] = useState('');
   const [skillLevel, setSkillLevel] = useState('');
@@ -143,7 +144,8 @@ const MainApp = ({ token, skillLevel,role, setToken }) => {
         <Route path="/flashcard_app" element={token ? (skillLevel === 'advanced' ? <FlashcardApp/> : <AdvancedPages />) : <Navigate to="/login" />}/>
         <Route path="/profile" element={token ?  <LearnerProfile/> : <QuizApp />}/>
         <Route path="/profilepage" element={token ?  <BeginnerProfile/> : <QuizApp />}/>
-        <Route path="/interpreter-profile" element={token ? (role=== 'interpreter' ? <InterpreterProfile/> : <InterpreterPages />)  : <Navigate to="/login"/> }/>  
+        <Route path="/interpreter-profile" element={token ? (role=== 'interpreter' ? <InterpreterProfile/> : <InterpreterPages />)  : <Navigate to="/login"/> }/> 
+        <Route path="/company-profile" element={token ? (role=== 'company' ? <CompanyProfile/>: <CompanyPages />)  : <Navigate to="/login"/>}/> 
         <Route path="/company-list" element={token ? (role=== 'company' ? <CompanyPages/> : <CompanyPages/>)  : <Navigate to="/login"/>}/>
         <Route path="/interpreter-pages" element={token ? (role=== 'interpreter' ? <InterpreterPages/> : <InterpreterPages />)  : <Navigate to="/login"/>}/>  
         <Route path="/company-pages" element={token ? (role=== 'company' ?  <CompanyPages/> : <MainPage />)  : <Navigate to="/login"/>}/>

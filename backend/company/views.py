@@ -1,9 +1,10 @@
 from company.models import Booking, Company, JobPosting
-from interpreter.models import Notification
+from interpreter.models import Interpreter, Notification
 from company.serializers import BookingCreateSerializer, BookingSerializer, CompanySerializer, JobPostingSerializer
 from rest_framework.response import Response
 from rest_framework.views import status,APIView
 from rest_framework import viewsets
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 
 class CompanyRegistrationView(APIView):
@@ -24,6 +25,19 @@ class CompanyViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Company.objects.all()
+    def patch(self, request, pk, *args, **kwargs):
+        try:
+            instance = Company.objects.get(pk=pk)
+        except Company.DoesNotExist:
+            raise NotFound("Instance not found.")
+        
+        serializer = CompanySerializer(instance, data=request.data,partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
     
 class JobPostingViewSet(viewsets.ModelViewSet):
     queryset = JobPosting.objects.all()
