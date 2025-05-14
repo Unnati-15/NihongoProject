@@ -27,9 +27,10 @@ class CompanySerializer(serializers.ModelSerializer):
         return company
 
 class JobPostingSerializer(serializers.ModelSerializer): 
+    company = CompanySerializer()
     class Meta:
         model = JobPosting
-        fields = ['id', 'job_title', 'description', 'language_needed', 'location', 'date_time', 'status', 'posted_at']    
+        fields = ['id', 'job_title', 'description', 'language_needed', 'location', 'date_time', 'status', 'posted_at','company']    
     
 class BookingSerializer(serializers.ModelSerializer):
     job_posting = JobPostingSerializer(read_only=True)
@@ -43,18 +44,18 @@ class BookingSerializer(serializers.ModelSerializer):
 class BookingCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['job_posting', 'interpreter', 'notes']
+        fields = ['job_posting', 'interpreter','status', 'notes']
 
-    def validate(self, data):
-    # Get the job_posting either from data or instance
-        job_posting = data.get('job_posting') or getattr(self.instance, 'job_posting', None)
-        interpreter = data.get('interpreter') or getattr(self.instance, 'interpreter', None)
+    # def validate(self, data):
+    # # Get the job_posting either from data or instance
+    #     job_posting = data.get('job_posting') or getattr(self.instance, 'job_posting', None)
+    #     interpreter = data.get('interpreter') or getattr(self.instance, 'interpreter', None)
 
-        if job_posting and interpreter:
-            job_time = job_posting.date_time
-            available_slots = Availability.objects.filter(interpreter=interpreter)
+    #     if job_posting and interpreter:
+    #         job_time = job_posting.date_time
+    #         available_slots = Availability.objects.filter(interpreter=interpreter)
 
-            if not any(slot.start_time <= job_time <= slot.end_time for slot in available_slots):
-                raise serializers.ValidationError("Interpreter is not available at the job time.")
+    #         if not any(slot.start_time <= job_time <= slot.end_time for slot in available_slots):
+    #             raise serializers.ValidationError("Interpreter is not available at the job time.")
     
-        return data
+    #     return data

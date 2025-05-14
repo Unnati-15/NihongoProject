@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Availability, Certification, InterpreterCertification, InterpreterLanguage, Language, User,Interpreter
+from .models import Availability, Certification, InterpreterCertification, InterpreterLanguage, Language,  User,Interpreter
 from users.serializers import UserSerializer
+from interpreter.models import Notification
 
 class LanguageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,48 +41,37 @@ class InterpreterSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'phone_number', 'address', 'bio', 'date_of_birth', 'language', 'certification', 'availability']
 
     def create(self, validated_data):
-        # Extract user data
         user_data = validated_data.pop('user')
-        user = User.objects.create_user(**user_data)
-
-        # Create Interpreter instance
-        interpreter = Interpreter.objects.create(user=user, phone_number=validated_data['phone_number'], 
-                                                 address=validated_data['address'], bio=validated_data['bio'],
-                                                 date_of_birth=validated_data['date_of_birth'])
-
-        # Handle many-to-many relationships (languages)
         languages_data = validated_data.pop('language', [])
-        for language_data in languages_data:
-            # Retrieve the Language instance from the database
-            language_name = language_data['language']['name']
-            language_instance = Language.objects.get(name=language_name)
-            InterpreterLanguage.objects.create(interpreter=interpreter, language=language_instance)
-
-        # Handle many-to-many relationships (certifications)
         certifications_data = validated_data.pop('certification', [])
-        for certification_data in certifications_data:
-            # Retrieve the Certification instance from the database
-            certification_name = certification_data['certification']['name']
-            issuing_organization = certification_data['certification']['issuing_organization']
-            issue_date = certification_data['certification']['issue_date']
-            expiry_date = certification_data['certification']['expiry_date']
-            
-            certification_instance, created = Certification.objects.get_or_create(
-                name=certification_name,
-                issuing_organization=issuing_organization,
-                issue_date=issue_date,
-                expiry_date=expiry_date
-            )
-
-            InterpreterCertification.objects.create(interpreter=interpreter, certification=certification_instance)
-
-        # Handle one-to-many relationships (availability)
         availability_data = validated_data.pop('availability', [])
-        for availability in availability_data:
-            Availability.objects.create(interpreter=interpreter, **availability)
+
+        user = User.objects.create_user(**user_data)
+        interpreter = Interpreter.objects.create(user=user, **validated_data)
+
+        # Save languages
+        for lang in languages_data:
+            lang_name = lang['language']['name']
+            lang_obj = Language.objects.get(name=lang_name)
+            InterpreterLanguage.objects.create(interpreter=interpreter, language=lang_obj)
+
+        # Save certifications
+        for cert in certifications_data:
+            cert_info = cert['certification']
+            cert_obj, _ = Certification.objects.get_or_create(
+                name=cert_info['name'],
+                issuing_organization=cert_info['issuing_organization'],
+                issue_date=cert_info['issue_date'],
+                expiry_date=cert_info['expiry_date'],
+            )
+            InterpreterCertification.objects.create(interpreter=interpreter, certification=cert_obj)
+
+        # Save availability
+        for avail in availability_data:
+            Availability.objects.create(interpreter=interpreter, **avail)
 
         return interpreter
-    def update(self, instance, validated_data):
+    def patch(self, instance, validated_data):
         # Extract nested user data from the validated data
         user_data = validated_data.pop('user', None)
         if user_data:
@@ -97,3 +87,9 @@ class InterpreterSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at']

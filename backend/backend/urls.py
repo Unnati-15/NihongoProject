@@ -24,7 +24,7 @@ from rest_framework.routers import DefaultRouter
 # from flashcard.views import FlashcardViewSet
 from company.views import BookingViewSet, CompanyRegistrationView, CompanyViewSet, JobPostingListAll, JobPostingViewSet,JobPostCompanyDetailView
 from flashcardapp.views import FlashcardAppViewSet, FlashcardDeckViewSet
-from interpreter.views import AddAvailabilityToInterpreterView, AddCertificationToInterpreterView, AddLanguageToInterpreterView, AvailabilityUpdateAPIView, InterpreterListAll, InterpreterListView,  InterpreterRegistrationView, InterpreterUpdateAPIView,  LanguageListView
+from interpreter.views import AddAvailabilityToInterpreterView, AddCertificationToInterpreterView, AddLanguageToInterpreterView, AvailabilityUpdateAPIView, GetCurrentInterpreterAPIView, InterpreterBookingListView, InterpreterListAll, InterpreterListView,  InterpreterRegistrationView, InterpreterUpdateAPIView,  LanguageListView, NotificationViewSet
 from quiz_app.views import AnswerViewSet, LearnerQuizAttemptsView, LevelViewSet,CategoryViewSet,QuizViewSet,QuestionViewSet, GetUserByUsernameView, SubmitQuizView
 from writeapp.views import WriteappViewSet
 from users.views import UserRegistrationView, UserLogoutView,UserLoginView
@@ -34,6 +34,7 @@ from flashcard.views import CreateDeckAPIView, FlashcardViewSet,GetCurrentDeckAP
 
 # Create a router and register our viewsets
 router = DefaultRouter()
+router.register(r'notifications', NotificationViewSet, basename='notifications')
 router.register(r'learner',LearnerViewSet,basename='learner')
 router.register(r'job_posting',JobPostingViewSet,basename='job-posting')
 router.register(r'bookings', BookingViewSet, basename='booking')
@@ -84,6 +85,7 @@ urlpatterns = [
     path('text-to-speech/', TextToSpeechView.as_view(), name='text_to_speech'),
     path('transcribe/',views.transcribe_audio),
     path('current-user/', GetCurrentUserAPIView.as_view(), name='current-user'),
+    path('current-interpreter/',GetCurrentInterpreterAPIView.as_view(), name='current-interpreter'),
     path('api/languages/', LanguageListView.as_view(), name='language-list'),
     path('api/interpreter/',InterpreterListView.as_view(),name='interpreter-detail'),
     path('api/interpreter/<int:interpreter_id>/add_language/', AddLanguageToInterpreterView.as_view(), name='add-language-to-interpreter'),
@@ -97,7 +99,7 @@ urlpatterns = [
     path('update-skill-level/<int:pk>/', UpdateSkillLevel.as_view(), name='update-skill-level'),
     path('learner-quiz-attempts/', LearnerQuizAttemptsView.as_view(), name='learner-quiz-attempts'),
     path('api/job_posts/<int:job_post_id>/company/', JobPostCompanyDetailView.as_view(), name='job_post_company_detail'),
-
+    path('api/interpreter/bookings/', InterpreterBookingListView.as_view(), name='interpreter-bookings'),
 
     # path('flashcard/', FlashCardList.as_view(), name='flashcard-list'),  # GET and POST
     # path('flashcard/<int:pk>/', FlashCardDetail.as_view(), name='flashcard-detail'),  # GET, PUT, DELETE

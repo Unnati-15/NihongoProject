@@ -2,15 +2,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status,viewsets
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics
-from interpreter.models import Availability, Certification, Interpreter, InterpreterCertification, InterpreterLanguage, Language
-from interpreter.serializers import InterpreterSerializer, LanguageSerializer
+from rest_framework.decorators import action
+from company.serializers import BookingSerializer
+from interpreter.models import Availability, Certification, Interpreter, InterpreterCertification, InterpreterLanguage, Language, Notification
+from interpreter.serializers import InterpreterSerializer, LanguageSerializer, NotificationSerializer
 from rest_framework.exceptions import NotFound
 
 class InterpreterRegistrationView(APIView):
     def post(self,request, *args, **kwargs):
         print(request.data)
-        serializer = InterpreterSerializer(data=request.data)
+        serializer = InterpreterSerializer(data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({
@@ -26,6 +27,17 @@ class InterpreterListAll(viewsets.ModelViewSet):
     def get_queryset(self):
         return Interpreter.objects.all()
     
+class GetCurrentInterpreterAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Correct field: 'user'
+            interpreter = Interpreter.objects.get(user=request.user)
+            return Response({"interpreterId": interpreter.id})
+        except Interpreter.DoesNotExist:
+            return Response({"error": "Interpreter not found"}, status=404)
+
 class InterpreterUpdateAPIView(APIView):
     def patch(self, request, pk, *args, **kwargs):
         try:
@@ -206,3 +218,29 @@ class AvailabilityUpdateAPIView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(recipient=self.request.user).order_by('-created_at')
+    @action(detail=True, methods=['post'])
+    def mark_as_read(self, request, pk=None):
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'marked as read'})
+    
+class InterpreterBookingListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            interpreter = Interpreter.objects.get(user=request.user)
+            bookings = interpreter.bookings.select_related('job_posting').all()
+            serializer = BookingSerializer(bookings, many=True)
+            return Response(serializer.data)
+        except Interpreter.DoesNotExist:
+            return Response({'detail': 'Interpreter not found'}, status=404)

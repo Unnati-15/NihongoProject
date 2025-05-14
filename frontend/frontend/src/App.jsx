@@ -34,6 +34,8 @@ import { CompanyPages } from './components/CompanyPages';
 import InterpreterProfile from "./components/InterpreterProfile";
 import CompanyList from "./components/CompanyList";
 import BeginnerProfile from "./components/BeginnerProfile";
+import Booking from "./components/Booking";
+import InterpreterBookings from "./components/InterpreterBookings";
 const App = () => {
   const [token, setToken] = useState('');
   const [skillLevel, setSkillLevel] = useState('');
@@ -65,7 +67,7 @@ const App = () => {
 // eslint-disable-next-line react/prop-types
 const MainApp = ({ token, skillLevel,role, setToken }) => {
   const location = useLocation(); // This will now work because it's inside Router
-  const showMainNavbar = !['/beginner-pages', '/advanced-pages','/phrases','/hiragana','/katakana','/kanji','/quiz','/quizapp','/profile','/profilepage','/interpreter-pages','/interpreter-profile','/company-list','/company-pages','/job-posts','/write','/flashcard','/more'].includes(location.pathname);
+  const showMainNavbar = !['/beginner-pages', '/advanced-pages','/phrases','/hiragana','/katakana','/kanji','/quiz','/quizapp','/profile','/profilepage','/interpreter-pages','/interpreter-profile','/company-list','/company-pages','/job-posts','/write','/flashcard','/more','/booking','/bookings'].includes(location.pathname);
 
   return (
     <>
@@ -146,6 +148,8 @@ const MainApp = ({ token, skillLevel,role, setToken }) => {
         <Route path="/interpreter-pages" element={token ? (role=== 'interpreter' ? <InterpreterPages/> : <InterpreterPages />)  : <Navigate to="/login"/>}/>  
         <Route path="/company-pages" element={token ? (role=== 'company' ?  <CompanyPages/> : <MainPage />)  : <Navigate to="/login"/>}/>
         <Route path="/job-posts" element={token ? (role=== 'company' ? <CompanyList/>: <MainPage />)  : <Navigate to="/login"/>}/>
+        <Route path="/booking" element={token ? (role=== 'company' ? <Booking/>: <Booking />)  : <Navigate to="/login"/>}/>
+        <Route path="/bookings" element={token ? (role=== 'interpreter' ? <InterpreterBookings/>: <InterpreterBookings />)  : <Navigate to="/login"/>}/>
       </Routes>
       <Footer />
     </>

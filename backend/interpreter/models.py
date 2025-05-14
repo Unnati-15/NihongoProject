@@ -3,7 +3,7 @@ from users.models import User
 # Create your models here.
 class Interpreter(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="interpreter_account")
-    phone_number = models.IntegerField()
+    phone_number = models.BigIntegerField()
     address = models.TextField()
     bio = models.TextField()
     date_of_birth = models.DateField()
@@ -39,3 +39,12 @@ class Availability(models.Model):
     def __str__(self):
         return f"{self.day_of_week} - {self.start_time} to {self.end_time}"
     
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"To {self.recipient.username}: {self.message[:40]}"

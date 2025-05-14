@@ -1,4 +1,5 @@
 from company.models import Booking, Company, JobPosting
+from interpreter.models import Notification
 from company.serializers import BookingCreateSerializer, BookingSerializer, CompanySerializer, JobPostingSerializer
 from rest_framework.response import Response
 from rest_framework.views import status,APIView
@@ -37,7 +38,11 @@ class JobPostingViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filter to show only the job postings related to the logged-in company's user
-        return JobPosting.objects.filter(company=self.request.user.company_account)
+        company = self.request.user  
+        print(company)
+        if hasattr(company, 'company_account'):
+            return JobPosting.objects.filter(company=company.company_account)
+        return JobPosting.objects.none()
     
 class JobPostingListAll(viewsets.ModelViewSet):
     serializer_class = JobPostingSerializer
@@ -57,7 +62,6 @@ class JobPostCompanyDetailView(APIView):
         
 
 class BookingViewSet(viewsets.ModelViewSet):
-    queryset = Booking.objects.all()
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -65,8 +69,26 @@ class BookingViewSet(viewsets.ModelViewSet):
             return BookingCreateSerializer
         return BookingSerializer
 
+    def get_queryset(self):
+        # Only return bookings for jobs that belong to the logged-in company
+        user = self.request.user
+        if hasattr(user, 'company_account'):
+            return Booking.objects.filter(job_posting__company=user.company_account)
+        return Booking.objects.none()
+
     def perform_create(self, serializer):
-        serializer.save()
+        booking = serializer.save()
+
+        # Create notification for interpreter
+        interpreter_user = booking.interpreter.user
+        job_title = booking.job_posting.job_title
+        company_name = booking.job_posting.company.user.username
+        message = f"You have a new booking request for '{job_title}' from {company_name}."
+
+        Notification.objects.create(
+            recipient=interpreter_user,
+            message=message
+        )
 
     def update(self, request, *args, **kwargs):
         booking = self.get_object()
@@ -75,7 +97,25 @@ class BookingViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         status_after = serializer.data.get('status')
+
         if status_before != status_after:
-            # Optional: send notification here
-            pass
+            interpreter = booking.interpreter
+            user = interpreter.user
+            job = booking.job_posting
+            company_name = job.company.user.username
+
+            if status_after == 'accepted':
+                message = f"Your application for '{job.job_title}' has been accepted by {company_name}."
+            elif status_after == 'declined':
+                message = f"Your application for '{job.job_title}' has been declined by {company_name}."
+            elif status_after == 'completed':
+                message = f"You have successfully completed your role as '{job.job_title}' in {company_name}."
+            elif status_after == 'cancelled':
+                message = f"Your application for '{job.job_title}' has been cancelled by {company_name}."
+            else:
+                message = None
+
+            if message:
+                Notification.objects.create(recipient=user, message=message)
+
         return Response(serializer.data)

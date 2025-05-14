@@ -8,7 +8,7 @@ export const InterpreterPages = () => {
   const [companyDetails, setCompanyDetails] = useState(null); // Company details data
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
   const [isLoadingCompany, setIsLoadingCompany] = useState(false); // Loading state for company details
-
+  const [interpreterId, setInterpreterId] = useState('');
   // Fetch data from the API
   useEffect(() => {
     const fetchJobPosts = async () => {
@@ -25,7 +25,31 @@ export const InterpreterPages = () => {
 
     fetchJobPosts();
   }, []);
-
+  // Fetch the interpreterId (current logged-in user)
+    useEffect(() => {
+      const fetchInterpreterId = async () => {
+        try {
+          const response = await fetch('http://127.0.0.1:8000/current-interpreter/', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Token ${localStorage.getItem('token')}`,  // Assuming you're using JWT for authentication
+            },
+          });
+  
+          if (response.ok) {
+            const data = await response.json();
+            console.log(data.interpreterId);
+            setInterpreterId(data.interpreterId);  
+          } else {
+            setError({ message: 'Failed to fetch interpreter information' });
+          }
+        } catch (error) {
+          setError({ message: 'Error fetching user data' });
+        }
+      };
+  
+      fetchInterpreterId();
+    }, []);
   // Fetch company details for a specific job post
   const fetchCompanyDetails = async (jobPostId) => {
     setIsLoadingCompany(true);
@@ -53,6 +77,35 @@ export const InterpreterPages = () => {
     setCompanyDetails(null); // Clear company details
     setSelectedJobPost(null); // Clear selected job post
   };
+
+  const applyForJob = async (jobPostId) => {
+  try {
+    const response = await fetch('http://localhost:8000/api/bookings/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Token ${localStorage.getItem('token')}`, 
+      },
+      body: JSON.stringify({
+        job_posting: jobPostId,
+        interpreter: interpreterId,
+        status: "pending",
+        notes: "I’m interested in this job."
+      }),
+    });
+
+    if (response.ok) {
+      alert('Application submitted!');
+    } else {
+      const error = await response.json();
+      alert('Failed: ' + JSON.stringify(error));
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error applying.');
+  }
+};
+
 
   if (loading) {
     return <div className="text-center text-xl text-purple-500">Loading...</div>;
@@ -105,11 +158,17 @@ export const InterpreterPages = () => {
                     View Company Details
                   </button>
                   <button
-                    onClick={() => handleViewClick(jobpost)} // Show modal with details of this job post
-                    className="btn btn-primary text-white bg-indigo-600 hover:bg-indigo-700"
-                  >
-                    Apply
-                  </button>
+  onClick={() => {
+    const confirmed = window.confirm("Are you sure you want to apply for this job?");
+    if (confirmed) {
+      applyForJob(jobpost.id);
+    }
+  }}
+  className="btn btn-primary text-white bg-indigo-600 hover:bg-indigo-700"
+>
+  Apply
+</button>
+
                 </div>
               </div>
             </div>

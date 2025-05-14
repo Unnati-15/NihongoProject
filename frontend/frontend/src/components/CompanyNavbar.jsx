@@ -28,11 +28,11 @@ const CompanyNavbar = () => {
         
         <div className="flex-none">
         <Link to="/company-pages"> <button className="btn btn-ghost text-2xl hover:bg-white hover:text-yellow-500 transition-all mr-4">
-            Home
+            Applications
           </button></Link>  
           
        <Link to="/job-posts"> <button className="btn btn-ghost text-2xl hover:bg-white hover:text-yellow-500 transition-all">
-            My Profile
+            Post a Job
           </button></Link>  
           <Link to="/booking"> <button className="btn btn-ghost text-2xl hover:bg-white hover:text-yellow-500 transition-all">
             Book an Interpreter
